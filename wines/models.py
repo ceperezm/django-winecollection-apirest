@@ -3,6 +3,7 @@ from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from datetime import datetime
 from locations.models import City
+from users.models import User
 
 
 class Attribute(models.Model):
@@ -83,6 +84,13 @@ class Wine(models.Model):
     """
     Model to store wine information.
     """
+    provider = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        limit_choices_to={'role': 'provider'},
+        null=True,
+        blank=True
+    )
     
     name = models.CharField(
         max_length=100,
@@ -130,9 +138,10 @@ class Wine(models.Model):
         help_text='City where the wine is produced'
     )
     
-    #Automatic timestamps
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    added_date = models.DateField(
+    auto_now_add=True,
+    help_text='Date the wine was added'
+    )
     
     class Meta:
         verbose_name = 'Wine'

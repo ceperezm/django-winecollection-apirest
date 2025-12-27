@@ -3,7 +3,6 @@ from rest_framework import viewsets
 from .models import (
     ProviderCollection,
     ClientCollection,
-    ProviderWine,
     ClientCollectionWine,
     ProviderCollectionWine,
 )
@@ -13,7 +12,6 @@ from .serializer import (
     ProviderCollectionWriteSerializer,
     ClientCollectionReadSerializer,
     ClientCollectionWriteSerializer,
-    ProviderWineSerializer,
     ClientCollectionWineSerializer,
     ProviderCollectionWineSerializer,
 )
@@ -23,7 +21,6 @@ from .permissions import (
     IsClient,
     IsProviderCollectionOwner,
     IsClientCollectionOwner,
-    IsProviderWineOwner,
     IsClientCollectionWineOwner,
     IsProviderCollectionWineOwner,
 )
@@ -71,20 +68,6 @@ class ClientCollectionViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(client=self.request.user)
-
-# Provider Wines
-class ProviderWineViewSet(viewsets.ModelViewSet):
-    serializer_class = ProviderWineSerializer
-
-    def get_queryset(self):
-        return ProviderWine.objects.all()
-
-    def get_permissions(self):
-        if self.action == "list":
-            return [IsProvider()]
-        elif self.action in ["retrieve", "update", "partial_update", "destroy"]:
-            return [IsProvider(), IsProviderWineOwner()]
-        return [IsProvider()]
 
 
 # Client collection wines

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import ClientCollection,ProviderCollection,ClientCollectionWine,ProviderCollectionWine,Type,ProviderWine
+from .models import ClientCollection,ProviderCollection,ClientCollectionWine,ProviderCollectionWine,Type
 from wines.serializer import WineReadSerializer, WineWriteSerializer
 from wines.models import Wine
 from users.models import User
@@ -31,7 +31,6 @@ class ProviderCollectionWriteSerializer(serializers.ModelSerializer):
         write_only=True
     )
     
-    
     class Meta:
         model = ProviderCollection
         fields = ['id', 'collection_name', 'description', 'provider_id', 'type_id', 'registration_date']
@@ -46,27 +45,7 @@ class ProviderCollectionWriteSerializer(serializers.ModelSerializer):
         return value
     def create(self, validated_data):
         return ProviderCollection.objects.create(**validated_data)
-        
-class ProviderWineSerializer(serializers.ModelSerializer): 
-    """Serializer for ProviderWine model."""
-    wine = WineReadSerializer(read_only=True)
-    wine_id = serializers.PrimaryKeyRelatedField(
-        queryset=Wine.objects.all(),
-        source='wine',
-        write_only=True
-    )
-    
-    class Meta:
-        model = ProviderWine
-        fields = ['id', 'provider', 'wine', 'wine_id', 'added_date']
-        read_only_fields = ['id', 'added_date', 'provider', 'wine']
-        
-    def validate(self, data): # Validate no duplicate wines from the same provider
-        provider = self.context['provider']
-        wine = data['wine']
-        if ProviderWine.objects.filter(provider=provider, wine=wine).exists():
-            raise serializers.ValidationError("This wine is already added from the provider.")
-        return data    
+   
         
 class ClientCollectionReadSerializer(serializers.ModelSerializer):
     """Serializer for reading ClientCollection data."""

@@ -28,13 +28,6 @@ class IsClientCollectionOwner(BasePermission):
             return True
         return obj.client == request.user
 
-class IsProviderWineOwner(BasePermission):
-    message = "You do not own this provider wine."
-
-    def has_object_permission(self, request, view, obj):
-        if request.user.is_staff or request.user.is_superuser:
-            return True
-        return obj.provider == request.user
 
 class IsClientCollectionWineOwner(BasePermission):
     message = "You do not own this collection wine."

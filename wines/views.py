@@ -1,21 +1,23 @@
 
 from rest_framework import viewsets, generics
-from rest_framework.permissions import IsAuthenticated, AllowAny,IsAdminUser
+from rest_framework.permissions import AllowAny
 
 from .models import Wine
 from .serializer import (WineReadSerializer, WineWriteSerializer)
 from .permissions import IsClient, IsProvider, IsProviderWineOwner
 
 class WineProviderViewSet(viewsets.ModelViewSet):
-    """View set for providers to manage wines."""
+    """
+    ViewSet for providers to manage their own wines.
+    """
     serializer_class = WineReadSerializer
     
     def get_queryset(self):
-        """Get queryset for wines."""
-        return Wine.objects.all()
+        """Get queryset for providers wines."""
+        return Wine.objects.filter(provider=self.request.user)
     
     def get_permissions(self):
-        if self.action == 'list':
+        if self.action in ['list', 'create']:
             return [IsProvider()]
         elif self.action in ['retrieve', 'update', 'partial_update', 'destroy']:
             return [IsProvider(), IsProviderWineOwner()]
@@ -37,12 +39,9 @@ class WineClientViewSet(viewsets.ReadOnlyModelViewSet):
     
     def get_permissions(self):
         """Get permissions based on action."""
-        if self.action == 'list':
-            return [IsAuthenticated(), IsClient()]
-        elif self.action == 'retrieve':
-            return [IsAuthenticated(), IsClient()]
-        
-        return [IsAuthenticated(), IsClient()]
+        if self.action in ['list', 'retrieve']:
+            return [ IsClient()]
+        return [IsClient()]
     
 class WinePublicListView(generics.ListAPIView):
     """Public view to list wines."""

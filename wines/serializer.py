@@ -27,18 +27,21 @@ class WineReadSerializer(serializers.ModelSerializer):
     """Serializer for reading wine data."""
     attribute = AttributeSerializer(read_only=True)
     city = CitySerializer(read_only=True)
+    provider = serializers.StringRelatedField(read_only=True)
     
     class Meta:
         model = Wine
         fields = [
             'id',
             'name',
+            'description',
             'harvest_year',
+            'maker',
             'variety',
             'attribute',
             'city',
-            'created_at',
-            'updated_at'
+            'provider',
+            'added_date',
         ]
        
 class WineWriteSerializer(serializers.ModelSerializer):
@@ -54,7 +57,9 @@ class WineWriteSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'name',
+            'description',
             'harvest_year',
+            'maker',
             'variety',
             'attribute',
             'city_id'
@@ -62,15 +67,20 @@ class WineWriteSerializer(serializers.ModelSerializer):
         read_only_fields = ['id']            
         
     def create(self, validated_data):
+        request = self.context.get('request')
+        
         attribute_data = validated_data.pop('attribute')
         attribute = Attribute.objects.create(**attribute_data)
-        wine = Wine.objects.create(attribute=attribute, **validated_data)
+        wine = Wine.objects.create(attribute=attribute, 
+                            provider=request.user, **validated_data)
         return wine
         
     def update(self, instance, validated_data):
         attribute_data = validated_data.pop('attribute', None)
+        
         if attribute_data:
-            attribute_serializer = AttributeSerializer(instance.attribute, data=attribute_data)
-            if attribute_serializer.is_valid(raise_exception=True):
-                attribute_serializer.save()
+            for field, value in attribute_data.items():
+                setattr(instance.attribute, field, value)
+            instance.attribute.save()
+                
         return super().update(instance, validated_data)
