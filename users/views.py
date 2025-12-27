@@ -24,12 +24,12 @@ class ClientViewSet(viewsets.ModelViewSet):
         :param self: Description
         """
         if self.action == 'list':
-            return [IsAuthenticated(), IsAdminUser()]
+            return [IsAdminUser()]
         
         elif self.action in ['retrieve', 'update', 'partial_update', 'destroy']:
             return [IsClient(), IsOwner()]
         
-        return [IsAuthenticated(), IsClient()]
+        return [IsClient()]
     
     @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated, IsClient])
     def me(self, request):
