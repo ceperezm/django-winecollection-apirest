@@ -27,7 +27,7 @@ class WineReadSerializer(serializers.ModelSerializer):
     """Serializer for reading wine data."""
     attribute = AttributeSerializer(read_only=True)
     city = CitySerializer(read_only=True)
-    provider = serializers.StringRelatedField(read_only=True)
+    provider = serializers.SerializerMethodField()
     
     class Meta:
         model = Wine
@@ -43,6 +43,11 @@ class WineReadSerializer(serializers.ModelSerializer):
             'provider',
             'added_date',
         ]
+    def get_provider(self, obj):
+        provider = getattr(obj, 'provider', None)
+        if not provider:
+            return None
+        return provider.name or provider.username    
        
 class WineWriteSerializer(serializers.ModelSerializer):
     """Serializer for creating and updating wine data."""
