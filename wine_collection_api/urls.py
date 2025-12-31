@@ -17,8 +17,32 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView,TokenRefreshView
+from rest_framework.schemas import get_schema_view
+from rest_framework.renderers import OpenAPIRenderer, JSONOpenAPIRenderer
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularSwaggerView,
+    SpectacularRedocView
+)
+
+schema_view = get_schema_view(
+    title="Wine collection API",
+    description="API Documentation for Wine Collection Application",
+    version="1.0.0",
+    public=True,
+    renderer_classes=[OpenAPIRenderer, JSONOpenAPIRenderer],
+)
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('docs/', SpectacularSwaggerView.as_view(url_name='schema')),
+    path('redoc/', SpectacularRedocView.as_view(url_name='schema')),
+    path('coltns/',include('coltns.urls')),
+    path('locations/',include('locations.urls')),
+    path('wines/',include('wines.urls')),
+    path('users/',include('users.urls')),
 ]
