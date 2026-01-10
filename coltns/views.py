@@ -34,9 +34,11 @@ class ProviderCollectionViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action == "list":
-            return [IsProvider()]
+            return [IsClient()] # only clients can see the list
+        elif self.action == "retrieve":
+            return [IsClient(),IsProviderCollectionOwner()]  # clients can see all, providers only their own
         elif self.action in ["retrieve", "update", "partial_update", "destroy"]:
-            return [IsProvider(), IsProviderCollectionOwner()]
+            return [IsProvider(), IsProviderCollectionOwner()]# only providers can modify their own
         return [IsProvider()]
 
     def get_serializer_class(self):
@@ -55,9 +57,10 @@ class ClientCollectionViewSet(viewsets.ModelViewSet):
         return ClientCollection.objects.all()
 
     def get_permissions(self):
-        if self.action == "list":
+        if self.action in ["list","retrieve"]:
             return [IsClient()]
-        elif self.action in ["retrieve", "update", "partial_update", "destroy"]:
+        
+        elif self.action in ["update", "partial_update", "destroy"]:
             return [IsClient(), IsClientCollectionOwner()]
         return [IsClient()]
 
@@ -78,9 +81,10 @@ class ClientCollectionWineViewSet(viewsets.ModelViewSet):
         return ClientCollectionWine.objects.all()
 
     def get_permissions(self):
-        if self.action == "list":
+        if self.action in ["list","retrieve"]:
             return [IsClient()]
-        elif self.action in ["retrieve", "update", "partial_update", "destroy"]:
+        
+        elif self.action in [ "update", "partial_update", "destroy"]:
             return [IsClient(), IsClientCollectionWineOwner()]
         return [IsClient()]
 
@@ -94,7 +98,9 @@ class ProviderCollectionWineViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action == "list":
-            return [IsProvider()]
+            return [IsClient()] # only clients can see the list
+        elif self.action == "retrieve":
+            return [IsClient(),IsProviderCollectionWineOwner()] # clients can see all, providers only their own
         elif self.action in ["retrieve", "update", "partial_update", "destroy"]:
-            return [IsProvider(), IsProviderCollectionWineOwner()]
+            return [IsProvider(), IsProviderCollectionWineOwner()] # only providers can modify their own
         return [IsProvider()]
