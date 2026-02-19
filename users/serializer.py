@@ -9,7 +9,12 @@ class CustomClientDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'first_name', 'last_name', 'birth_date', 'registration_date', 'email', 'is_active']
-        read_only_fields = ['registration_date','is_active']
+        read_only_fields = ['id','first_name', 'last_name','registration_date','is_active']
+        
+    def validate_username(self,value):
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError("A user is already registered with this username.")
+        return value     
         
     def validate_email(self, value):
         if self.instance and self.instance.email == value:
@@ -17,8 +22,7 @@ class CustomClientDetailSerializer(serializers.ModelSerializer):
         if User.objects.filter(email=value, role='client').exclude(id=self.instance.id if self.instance else None).exists():
             raise serializers.ValidationError("A user is already registered with this e-mail address.")
         return value
-        
-        
+           
         
 class CustomProviderDetailSerializer(serializers.ModelSerializer):
     """Serializer view and edit for providers."""
@@ -27,8 +31,13 @@ class CustomProviderDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'name', 'description', 'phone_number', 'identifier_number', 'city', 'registration_date', 'email', 'is_active']
-        read_only_fields = ['registration_date','is_active']
-        
+        read_only_fields = ['id','identifier_number','registration_date','is_active']
+    
+    def validate_name(self,value):
+        if User.objects.filter(name=value).exists():
+            raise serializers.ValidationError("A user is already registered with this name.")
+        return value     
+    
     def validate_email(self, value):
         if self.instance and self.instance.email == value:
             return value
@@ -89,8 +98,13 @@ class ClientRegisterSerializer(serializers.ModelSerializer):
         model = User
         fields = ['username', 'first_name', 'last_name', 'birth_date', 'email', 'password1', 'password2']
         extra_kwargs = {
-            'first_name': {'required': True},'last_name': {'required': True},'email': {'required': True},'username': {'required': True},
+            'username': {'required': True},'first_name': {'required': True},'last_name': {'required': True},'email': {'required': True},'birth_date': {'required': True},
         }
+        
+    def validate_username(self,value):
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError("A user is already registered with this username.")
+        return value        
         
     def validate_email(self, value):
         if User.objects.filter(email=value, role='client').exists():
@@ -124,14 +138,30 @@ class ProviderRegisterSerializer(serializers.ModelSerializer):
         model = User
         fields = ['name', 'description', 'phone_number', 'identifier_number', 'city', 'email', 'password1', 'password2']
         extra_kwargs = {
-            'name': {'required': True},'phone_number': {'required': True},'identifier_number': {'required': True},'email': {'required': True},
+            'email': {'required': True},
+            'name': {'required': True},
+            'description': {'required': True},
+            'phone_number': {'required': True},
+            'identifier_number': {'required': True},
+            'city': {'required': True},
         }
+        
+    
+    def validate_name(self,value):
+        if User.objects.filter(name=value).exists():
+            raise serializers.ValidationError("A user is already registered with this name.")
+        return value 
+    
+    def validate_identifier_number(self,value):
+        if User.objects.filter(identifier_number=value).exists():
+            raise serializers.ValidationError("A user is already registered with this identifier number.")
+        return value    
         
     def validate_email(self, value):
         if User.objects.filter(email=value, role='provider').exists():
             raise serializers.ValidationError("A user is already registered with this e-mail address.")
         return value
-        
+    
     def validate(self, data):
         if data['password1'] != data['password2']:
             raise serializers.ValidationError("The two password fields didn't match.")

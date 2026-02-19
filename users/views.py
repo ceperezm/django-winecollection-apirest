@@ -1,7 +1,7 @@
 from rest_framework import viewsets, generics, status
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from rest_framework.decorators import action
 
 from .models import User
@@ -25,6 +25,9 @@ class ClientViewSet(viewsets.ModelViewSet):
         """
         if self.action in ['list','retrieve'] :
             return [IsClient()]
+        
+        elif self.action == 'create':
+            return [IsAdminUser()]
         
         elif self.action in ['update', 'partial_update', 'destroy']:
             return [IsClient(), IsOwner()]
@@ -68,6 +71,8 @@ class ProviderViewSet(viewsets.ModelViewSet):
             return [IsClient()]
         elif self.action == 'retrieve': # clients see all, providers see only their own
             return [IsClient(), IsOwner()] 
+        elif self.action == 'create':
+            return [IsAdminUser()]
         elif self.action in ['update', 'partial_update', 'destroy']: # only provider can modify their own
             return [IsProvider(), IsOwner()]
         return [IsProvider()]
