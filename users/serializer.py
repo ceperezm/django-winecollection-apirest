@@ -124,10 +124,9 @@ class ClientRegisterSerializer(serializers.ModelSerializer):
         client.set_password(password)
         client.save()
         return client
-                 
-           
-# For provider registration 
+                      
 
+# For provider registration 
 class ProviderRegisterSerializer(serializers.ModelSerializer):
     """Register for new providers."""   
     password1 = serializers.CharField(write_only=True, required=True, validators=[validate_password],

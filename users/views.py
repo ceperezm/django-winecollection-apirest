@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from rest_framework.decorators import action
 
 from .models import User
-from .permissions import IsClient, IsProvider, IsOwner
+from .permissions import IsClient, IsProvider, IsOwner, CanViewUserProfile
 from .serializer import (ClientLoginSerializer, CustomClientDetailSerializer,
                          CustomProviderDetailSerializer,ProviderLoginSerializer,ClientRegisterSerializer,
                          ProviderRegisterSerializer)
@@ -70,7 +70,7 @@ class ProviderViewSet(viewsets.ModelViewSet):
         if self.action == 'list': # only clients can see provider list
             return [IsClient()]
         elif self.action == 'retrieve': # clients see all, providers see only their own
-            return [IsClient(), IsOwner()] 
+            return [CanViewUserProfile()] 
         elif self.action == 'create':
             return [IsAdminUser()]
         elif self.action in ['update', 'partial_update', 'destroy']: # only provider can modify their own

@@ -20,3 +20,20 @@ class IsOwner(permissions.BasePermission):
             return True
         
         return obj == request.user
+    
+class CanViewUserProfile(permissions.BasePermission):
+    message = "You don't have permission to view this profile."
+    def has_permission(self, request, view):
+        return request.user.is_authenticated
+
+    def has_object_permission(self, request, view, obj):
+        user = request.user
+        if user.is_staff or user.is_superuser:
+            return True
+
+        if user.role == 'client':
+            return True 
+        if user.role == 'provider':
+            return obj == user      
+
+        return False    

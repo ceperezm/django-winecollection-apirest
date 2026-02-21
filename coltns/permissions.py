@@ -44,3 +44,30 @@ class IsProviderCollectionWineOwner(BasePermission):
         if request.user.is_staff or request.user.is_superuser:
             return True
         return obj.provider_collection.provider == request.user
+
+class CanViewProviderCollection(BasePermission):
+
+    """
+    Permission to view provider collections based on user role.
+    Clients can view all provider collections.
+    Providers can only view their own provider collections.
+    """
+    message = "You do not have permission to view this collection."
+    
+    def has_permission(self, request, view):
+        user = request.user
+        if not user.is_authenticated:
+            return False
+        if user.role in ["client", "provider"]:
+            return True
+        if user.is_staff or user.is_superuser:
+            return True
+        return False
+
+    def has_object_permission(self, request, view, obj):
+        user = request.user
+        if user.role == "client":
+            return True
+        if user.role == "provider":
+            return obj.provider == user
+        return False
